@@ -21,9 +21,8 @@ export function shareImageOrPDF(fileUrl, type) {
         // Sharing with WhatsApp need message and title??? WHY
         let options = {
           type: type,
-          message: "",
-          title: "",
-          //   message: "TestMessage",
+          subject: "Subject",
+          message: "TestMessage",
           //   title: "TestTitle",
           url: base64Data
         };
