@@ -16,15 +16,13 @@ export function shareImageOrPDF(fileUrl, type) {
       .then(async base64Data => {
         // here's base64 encoded image or pdf
         // type = application/pdf or image/png
-        base64Data = `data:${type};base64,` + base64Data;
 
-        // Sharing with WhatsApp need message and title??? WHY
         let options = {
-          type: type,
+          // type: type,
           subject: "Subject",
           message: "TestMessage",
           //   title: "TestTitle",
-          url: base64Data
+          url: `data:${type};base64,` + base64Data
         };
 
         await Share.open(options);
