@@ -1,34 +1,43 @@
+import { Platform } from "react-native";
 import Share from "react-native-share";
 import RNFetchBlob from "react-native-fetch-blob";
-
+const RNFS = RNFetchBlob.fs;
+const DIRS = RNFetchBlob.fs.dirs;
 export function shareImageOrPDF(fileUrl, type) {
   try {
-    let filePath = null;
+    let filePath = `${RNFS.DocumentDirectoryPath}/${fileUrl}.pdf`;
     let file_url_length = fileUrl.length;
 
-    RNFetchBlob.config({ fileCache: true })
+    const configOptions = {
+      fileCache: true
+    };
+
+    if (Platform.OS === "ios") {
+      configOptions.path =
+        DIRS.DocumentDir +
+        (type === "application/pdf" ? "/temp.pdf" : "/temp.png"); // no difference when using jpeg / jpg / png /
+    }
+
+    RNFetchBlob.config(configOptions)
       .fetch("GET", fileUrl)
       // the image or pdf is now dowloaded to device's storage
-      .then(resp => {
+      .then(async resp => {
         filePath = resp.path();
-        return resp.readFile("base64");
-      })
-      .then(async base64Data => {
-        // here's base64 encoded image or pdf
-        // type = application/pdf or image/png
+
+        let uri =
+          Platform.OS === "android" ? "file://" + filePath : "" + filePath;
 
         let options = {
-          // type: type,
+          type: type,
           subject: "Subject",
           message: "TestMessage",
           //   title: "TestTitle",
-          url: `data:${type};base64,` + base64Data
+          url: uri
         };
 
         await Share.open(options);
-
         // remove the image or pdf from device's storage
-        RNFetchBlob.fs.unlink(filePath);
+        await RNFetchBlob.fs.unlink(filePath);
       });
   } catch (error) {
     // console.log(error);
